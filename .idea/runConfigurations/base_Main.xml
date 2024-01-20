@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="base.Main" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="base.no.states.Main" />
+    <module name="Practica" />
+    <option name="PROGRAM_PARAMETERS" value="base.Main" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

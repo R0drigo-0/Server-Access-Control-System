@@ -1,0 +1,262 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam classAttributeIconSize 0
+
+'class Webserver {
+'- {static} PORT :int
+'- {static} FORMATTER : DateTimeFormatter
+'+ Webserver()
+'}
+
+'class SocketThread {
+'- insocked : Socked
+'- makeRequest(tokens : String[]) : Request
+'- makeRequestReader(tokens : String[]) : RequestReader
+'- makeRequestArea(tokens : String[]) : RequestArea
+'- makeHeaderAnswer() : String
+'- makeJsonAnswer(request : Request) : String
+'+ run()
+'}
+'
+'Webserver +-right- SocketThread
+
+'note right of SocketThread
+'inner class
+'of Webserver
+'end note
+
+class Scheduler{
+    - startTime : LocalTime
+    - endTime : LocalTime
+    - startDate : LocalDate
+    - endDate : LocalDate
+    - daysAllowed : ArrayList<DayOfWeek>
+}
+
+Scheduler *-- DirectoryUsersGroups
+
+class DirectoryUsersGroups {
+- {static} ALL_USERS : ArrayList<User>
++ {static} makeUsers()
++ {static} findUserByCredential(credential : String) : User
+}
+
+DirectoryUsersGroups o--> "1..*" UserGroup : "usersGroups"
+
+class UserGroup{
+    - groupName : String
+    - scheduler : Scheduler
+    - actionsForbbiden : ArrayList<String>
+    - areasForbbiden : ArrayList<String>
+    + canSendRequest(now : LocalDateTime) : boolean
+    + canBeInSpace(space : Space)
+    + doAction(action : String)
+}
+
+class User{
+    - name : String
+    - credential : String
+    - userGroup : UserGroup
+    + toString()
+    + canSendRequest(now : LocalDateTime)
+    + canBeInSpace(space : Space)
+    + doAction(action : String)
+}
+
+UserGroup "1 userGroup" *--> "users *" User
+User <-- Space
+class Door {
+- id : String
+- closed : boolean
+- currentState : DoorState
+- fromSpace : Space
+- toSpace : Space
++ processRequest(request : RequestReader)
++ doAction(action : String)
++ isClosed() : boolean
++ toString() : String
++ toJson() : JSONObject
+}
+
+class Main {
++ {static} main(args : String)
+}
+
+class Clock{
+    - INSTANCE : Clock
+    - date : LocalDateTime
+    - timer : Timer
+    - period : int
+    - listClockObserver : ArrayList<ClockObservable>
+    - Clock(phase : int)
+    + start()
+    + getInstace()
+    + notifyObserver()
+    + addObserver(observer : ClockObserver)
+    + deleteObserver(observer : ClockObserver)
+    + stop()
+}
+
+Clock <-- Clock
+
+abstract ClockObservable{
+    + addObserver(observer : ClockObserver)
+    + deleteObserver(observer : ClockObserver)
+    + notifyObserver(observer : ClockObserver)
+}
+
+Clock --|> ClockObservable
+
+interface ClockObserver{
+    update(now : LocalDateTime)
+}
+
+ClockObservable --> ClockObserver
+DoorState ..|> ClockObserver
+
+DoorState o-left- Clock
+DoorState <-right- States
+    abstract class DoorState{
+        # door : Door
+        # state : String
+        + DoorState(door : Door)
+        + open()
+        + close()
+        + lock()
+        + unlock()
+        + unlockShortly()
+        + update(now : LocalDateTime)
+    }
+
+    class Unlocked{
+        + DoorState(door : Door)
+        + open()
+        + close()
+        + lock()
+        + unlock()
+        + unlockShortly()
+        + update(now : LocalDateTime)
+    }
+
+    class Locked{
+        + DoorState(door : Door)
+        + open()
+        + close()
+        + lock()
+        + unlock()
+        + unlockShortly()
+        + update(now : LocalDateTime)
+    }
+
+    class UnlockedShortly{
+        + FREQUENCY_TIMER : int
+        + DoorState(door : Door)
+        + open()
+        + close()
+        + lock()
+        + unlock()
+        + unlockShortly()
+        + update(now : LocalDateTime)
+    }
+
+    class Propped{
+        + DoorState(door : Door)
+        + open()
+        + close()
+        + lock()
+        + unlock()
+        + unlockShortly()
+        + update(now : LocalDateTime)
+    }
+
+    class States{
+        + LOCKED : String
+        + UNLOCKED : String
+        + UNLOCKED_SHORTLY : String
+    }
+
+    class Actions{
+        + LOCK : String
+        + UNLOCK : String
+        + UNLOCK_SHORTLY : String
+        + OPEN : String
+        + CLOSE : String
+    }
+
+    Door <-right- Actions
+
+class Space{
+    - doors : ArrayList<Door>
+    + getId() : String
+    + findAreaById(String id) : Area
+    + getDoorsGivingAccess() : ArrayList<Door>
+    + getFather() : Area
+    + getSpaces() : ArrayList<Area>
+}
+
+class Partition{
+    - childrenAreas : ArrayList<Area>
+    + getId() : String
+    + addArea(area : Area)
+    + findAreaById(id : String) : Area
+    + getDoorsGivingAccess() : ArrayList<Door>
+    + getSpaces() : ArrayList<Door>
+}
+
+abstract class Area{
+    - id : String
+    - description : String
+    + findAreaById(id : String) : Area
+    + getDoorsGivingAccess() : ArrayList<Door>
+    + getSpaces() : ArrayList<Space>
+}
+
+class DirectoryAreas{
+    - UNIQUE_INSTANCE : DirectoryAreas
+    - root : Area
+    - allDoors : Door[]
+    - DirectoryAreas()
+    + makeAreas()
+    + findAreaById(id : String) : Area
+    + findDoorById(id : String) : Door
+    + getAllDoors() : ArrayList<Door>
+    + getUniqueInstance() : DirectoryAreas
+}
+
+DirectoryAreas <-- DirectoryAreas
+
+DoorState <-up- Door : "states"
+DoorState <|-- Unlocked
+DoorState <|-- Locked
+DoorState <|-- UnlockedShortly
+DoorState <|-- Propped
+
+'Main -[hidden]down- Webserver
+'Webserver -[hidden]down- DirectoryDoors'
+'DirectoryDoors -[hidden]right- DirectoryUsers'
+
+Space *-- Door : "doors"
+Area <|-- Space : "space"
+Area <|-- Partition : "partition"
+DirectoryAreas "1" --> "n" Area : "areas"
+Partition *--> "*"Area
+
+class WebServer{
+    - {static} PORT : int
+    - {static} FORMATTER : DateTimeFormatter
+}
+
+class SocketThread{
+    - insocked : Socked
+    - makeRequest(tokens : String[]) : Request
+    - makeRequestRenders(tokens : String[]) : RequestReader
+    - makeRequestArea(tokens : String[]) : RequestArea
+    - makeHeaderArea() : String
+    - makeJsonAnswer(request : Request) : String
+    + run()
+}
+
+WebServer +-left- SocketThread
+
+
+@enduml
