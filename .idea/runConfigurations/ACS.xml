@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ACS" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="openjdk-20" />
-    <option name="MAIN_CLASS_NAME" value="base.no.states.main" />
+    <option name="MAIN_CLASS_NAME" value="base.no.states.Main" />
     <module name="ACS-webserver" />
     <option name="PROGRAM_PARAMETERS" value="base.Main" />
     <option name="VM_PARAMETERS" value="-ea" />
